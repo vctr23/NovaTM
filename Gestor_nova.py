@@ -32,10 +32,10 @@ class MainWindow():
         ctk.set_appearance_mode("system")
         self.root = root
         self.root.title("NovaTM")
-        center_window(self.root, 1200)
+        center_window(self.root, 1100)
         
         self.root.grid_rowconfigure(0, weight = 1)
-        self.root.grid_rowconfigure(1, weight = 3)
+        self.root.grid_rowconfigure(1, weight = 10)
         self.root.grid_rowconfigure(2, weight = 1)
         self.root.columnconfigure(0, weight = 1)
         
@@ -59,24 +59,45 @@ class FrameTop(ctk.CTkFrame):
         self.grid_columnconfigure([0, 1, 2], weight = 1)
      
         self.task_entry = ctk.CTkEntry(self, placeholder_text="Insert task name", font = ("Helvetica", 16))
-        self.task_entry.grid(row = 0,column = 0, sticky = tk.NSEW, padx = 20, pady = 20)
+        self.task_entry.grid(row = 0,column = 0, sticky = tk.EW, padx = 20, pady = 20)
         
         self.list = ctk.CTkComboBox(self, values = ["Alta", "Media", "Baja"], font = ("Helvetica",16))
-        self.list.grid(row = 0, column = 1 , sticky = tk.NSEW, padx = 30, pady = 20)
+        self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30, pady = 20)
         
         self.add_button = ctk.CTkButton(self, text = "Add task", corner_radius= 20, border_width = 2, 
                                         fg_color="transparent", font = ("Helvetica",16), hover_color="#3A3434")
-        self.add_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 20, pady = 20)
+        self.add_button.grid(row = 0, column = 2, sticky = tk.EW, padx = 20, pady = 20)
         
         
 class FrameMid(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
-        
+
+        self.grid_rowconfigure(0, weight = 1)
+        self.grid_columnconfigure(0, weight = 1)
+
+        self.task_treeview = ttk.Treeview(self, columns = ["Tarea", "Prioridad", "Estado"], show = "headings")
+        self.task_treeview.heading('Tarea', text='Tarea')
+        self.task_treeview.heading('Prioridad', text='Prioridad')
+        self.task_treeview.heading('Estado', text='Estado')
+        self.task_treeview.grid(row = 0, column = 0, sticky = tk.NSEW)
+
+        self.scroll = ttk.Scrollbar(self, orient="vertical", command = self.task_treeview.yview)
+        self.task_treeview.configure(yscroll = self.scroll.set)
+        self.scroll.grid(row = 0, column = 1, sticky = tk.NS)
         
 class FrameBot(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+
+        self.grid_rowconfigure(0, weight = 1)
+        self.grid_columnconfigure([0, 1, 2], weight = 1)
+
+        self.button_eliminate = ctk.CTkButton(self, text = "Eliminar", fg_color="transparent", border_width = 2, corner_radius = 20)
+        self.button_eliminate.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 10)
+
+        self.light_dark_button = ctk.CTkButton(self, text = "a", fg_color="transparent", border_width = 2, corner_radius = 20)
+        self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
         
 #%% Main
 if __name__ == "__main__":
