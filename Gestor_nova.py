@@ -63,17 +63,17 @@ class FrameTop(ctk.CTkFrame):
         self.grid_columnconfigure([0, 1, 2], weight = 1)
      
         self.task_entry = ctk.CTkEntry(self, placeholder_text="Insert task name", font = ("Helvetica", 16))
-        self.task_entry.grid(row = 0,column = 0, sticky = tk.EW, padx = 20, pady = 20)
+        self.task_entry.grid(row = 0,column = 0, sticky = tk.EW, padx = 20)
         
         self.list = ctk.CTkComboBox(self, values = ["Alta", "Media", "Baja"], font = ("Helvetica",16))
-        self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30, pady = 20)
+        self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30)
         
         self.add_button = ctk.CTkButton(self, text = "Add task", 
                                         command = lambda: Main.add_task(self.task_entry, self.list, task_treeview, self.task_label, 
                                                                         self.label_completed_task),
                                         corner_radius= 20, border_width = 2, 
                                         fg_color="transparent", font = ("Helvetica",16))
-        self.add_button.grid(row = 0, column = 2, sticky = tk.EW, padx = 20, pady = 20)
+        self.add_button.grid(row = 0, column = 2, sticky = tk.EW, padx = 20)
         
         self.task_label = ctk.CTkLabel(self, text = "Tareas totales: 0", font = ("Helvetica", 14))
         self.task_label.grid(row = 1, column = 0, sticky = tk.EW)
@@ -95,6 +95,7 @@ class FrameMid(ctk.CTkFrame):
         self.task_treeview.heading("Fecha", text = "Fecha")
         self.task_treeview.grid(row = 0, column = 0, sticky = tk.NSEW)
         
+        self.task_treeview.bind("<Double-1>", lambda event: Main.edit_tasks(event, self.task_treeview))     
         # See if the scrollbar works:
         # contacts = []
         # for n in range(1, 100):
@@ -124,12 +125,9 @@ class FrameBot(ctk.CTkFrame):
         self.button_completed.grid(row = 0, column = 1, sticky = tk.NSEW, padx = 10)
 
         self.img = Image.open("Images\\light_dark.ico")
-        self.img = self.img.resize((25, 25))
+        self.img_resized = self.img.resize((30, 30))
+        self.img = ImageTk.PhotoImage(self.img_resized)
         self.light_dark_button = ctk.CTkButton(self, text = "", command = lambda: Main.change_appearance_mode(),
-                                               image= ImageTk.PhotoImage(self.img),
+                                            image= ctk.CTkImage(dark_image=self.img_resized, light_image=self.img_resized),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
-
-        
-    
-    

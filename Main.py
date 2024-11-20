@@ -25,10 +25,10 @@ def count_tasks(task_treeview, label_task, label_completed_task):
 def add_task(entry, list, task_treeview, label_task, label_completed_task):
     task = entry.get()
     priority = list.get()
-    state = "Activo"
+    state = "Activa"
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if task.replace(" ", "").isalnum() and len(task) != 0: 
+    if len(task) != 0: 
         insert = task_treeview.insert("", "end", values = [task, priority, state, date])
         count_tasks(task_treeview, label_task, label_completed_task)
         entry.delete(0, "end")
@@ -62,19 +62,30 @@ def mark_as_completed(task_treeview, label_task, label_completed_task):
             old_values = task_treeview.item(task, "values")
             task_treeview.item(task, values = (old_values[0], old_values[1], "Completada", old_values[3]))
         count_tasks(task_treeview, label_task, label_completed_task)
+        
+
     else:
         messagebox.showwarning(title = "Warning", message = "Seleccione al menos una tarea para marcar como completada.")
         
-def edit_tasks(event, task_treeview, entry, list):
+def edit_tasks(event, task_treeview):
     task = task_treeview.selection()
     if task:
-        task_name = entry.get()
-        priority = list.get()
+        ctkinput = ctk.CTkInputDialog(text = "Introduce el nuevo nombre")
+        task_name = ctkinput.get_input()
+        ctkinput2 = ctk.CTkInputDialog(text = "Introduce la prioridad (Alta, Media, Baja)")
+        priority = ctkinput2.get_input()
+        ctkinput3 = ctk.CTkInputDialog(text = "Introduce el estado de la tare (Activa o Completada)")
+        state = ctkinput3.get_input()
         date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        task_treeview.item(task, values = (task_name, priority, "Activa", date))
-    
-
-
+        if priority.strip() not in ["Alta", "Media", "Baja"]:
+            messagebox.showwarning(title = "Warning", message= "Debes escribir un valor de prioridad correcto.")
+            return
+        elif state.strip() not in ["Activa", "Completada"]:
+            messagebox.showwarning(title = "Warning", message= "Debes escribir un valor de estado correcto.")
+            return
+        else:
+            task_treeview.item(task, values = (task_name, priority, state, date))
+            messagebox.showinfo(title = "Info", message = "La fila ha sido editada correctamente")
 
 
 def change_appearance_mode():
@@ -83,9 +94,6 @@ def change_appearance_mode():
     else:
         ctk.set_appearance_mode("Dark")
  
-    
-
-
 #%% 4. Main
 if __name__ == "__main__":
     root = ctk.CTk()
