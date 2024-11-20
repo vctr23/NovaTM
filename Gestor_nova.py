@@ -10,8 +10,8 @@ Created on Tue Nov 19 16:14:03 2024
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+from PIL import Image, ImageTk
 import Main
-import datetime
 #%% 3. Code
 def center_window(root, window_width):
     screen_width = root.winfo_screenwidth()
@@ -31,7 +31,7 @@ class MainWindow():
     Return -> None.
     """
     def __init__(self, root):
-        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("green")
         self.root = root
         self.root.title("NovaTM")
         center_window(self.root, 1100)
@@ -47,9 +47,13 @@ class MainWindow():
         self.frame_top = FrameTop(self.root, self.frame_mid.task_treeview)
         self.frame_top.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
                 
-        self.frame_bot = FrameBot(self.root, self.frame_mid.task_treeview)
+        self.frame_bot = FrameBot(self.root, self.frame_mid.task_treeview, self.frame_top.task_label,
+                                self.frame_top.label_completed_task)
         self.frame_bot.grid(row = 2, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
         
+        self.upload = Main.import_from_json(self.frame_mid.task_treeview, self.frame_top.task_label,
+                                            self.frame_top.label_completed_task)
+    
         
 class FrameTop(ctk.CTkFrame):
     def __init__(self, master, task_treeview):
@@ -65,13 +69,17 @@ class FrameTop(ctk.CTkFrame):
         self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30, pady = 20)
         
         self.add_button = ctk.CTkButton(self, text = "Add task", 
-                                        command = lambda: Main.add_task(self.task_entry, self.list, task_treeview, self.task_label),
+                                        command = lambda: Main.add_task(self.task_entry, self.list, task_treeview, self.task_label, 
+                                                                        self.label_completed_task),
                                         corner_radius= 20, border_width = 2, 
-                                        fg_color="transparent", font = ("Helvetica",16), hover_color="#3A3434")
+                                        fg_color="transparent", font = ("Helvetica",16))
         self.add_button.grid(row = 0, column = 2, sticky = tk.EW, padx = 20, pady = 20)
         
-        self.task_label = ctk.CTkLabel(self, text = "Tareas:", font = ("Helvetica", 16))
-        self.task_label.grid(row = 1, column = 1, sticky = tk.EW, pady = 10)
+        self.task_label = ctk.CTkLabel(self, text = "Tareas totales: 0", font = ("Helvetica", 14))
+        self.task_label.grid(row = 1, column = 0, sticky = tk.EW)
+
+        self.label_completed_task = ctk.CTkLabel(self, text = "Tareas completadas: 0", font = ("Helvetica", 14))
+        self.label_completed_task.grid(row = 1, column = 2, sticky = tk.EW)
 
 class FrameMid(ctk.CTkFrame):
     def __init__(self, master):
@@ -100,21 +108,25 @@ class FrameMid(ctk.CTkFrame):
         self.scroll.grid(row = 0, column = 1, sticky = tk.NS)
         
 class FrameBot(ctk.CTkFrame):
-    def __init__(self, master, task_treeview):
+    def __init__(self, master, task_treeview, label_task, label_completed_task):
         super().__init__(master)
 
         self.grid_rowconfigure(0, weight = 1)
         self.grid_columnconfigure([0, 1, 2], weight = 1)
 
-        self.button_eliminate = ctk.CTkButton(self, text = "Eliminar", command = lambda: Main.eliminate(task_treeview), 
+        self.button_eliminate = ctk.CTkButton(self, text = "Eliminar", command = lambda: Main.eliminate(task_treeview, label_task, label_completed_task), 
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.button_eliminate.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 10)
 
         self.button_completed = ctk.CTkButton(self, text="Mark as completed", 
+                                            command= lambda: Main.mark_as_completed(task_treeview, label_task, label_completed_task),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.button_completed.grid(row = 0, column = 1, sticky = tk.NSEW, padx = 10)
 
-        self.light_dark_button = ctk.CTkButton(self, text = "a", 
+        self.img = Image.open("Images\\light_dark.ico")
+        self.img = self.img.resize((25, 25))
+        self.light_dark_button = ctk.CTkButton(self, text = "", command = lambda: Main.change_appearance_mode(),
+                                               image= ImageTk.PhotoImage(self.img),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
 
