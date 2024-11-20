@@ -40,6 +40,7 @@ class MainWindow():
         self.root.grid_rowconfigure(1, weight = 10)
         self.root.grid_rowconfigure(2, weight = 1)
         self.root.columnconfigure(0, weight = 1)
+        style()
               
         self.frame_mid = FrameMid(self.root)
         self.frame_mid.grid(row = 1, column = 0, sticky = tk.NSEW, padx = 20)
@@ -65,20 +66,20 @@ class FrameTop(ctk.CTkFrame):
         self.task_entry = ctk.CTkEntry(self, placeholder_text="Insert task name", font = ("Helvetica", 16))
         self.task_entry.grid(row = 0,column = 0, sticky = tk.EW, padx = 20)
         
-        self.list = ctk.CTkComboBox(self, values = ["Alta", "Media", "Baja"], font = ("Helvetica",16))
+        self.list = ctk.CTkComboBox(self, values = ["High", "Medium", "Low"], font = ("Helvetica",16))
         self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30)
         
         self.add_button = ctk.CTkButton(self, text = "Add task", 
-                                        command = lambda: Main.add_task(self.task_entry, self.list, task_treeview, self.task_label, 
-                                                                        self.label_completed_task),
+                                        command = lambda: Main.add_task(self.task_entry, self.list, task_treeview, 
+                                                                        self.task_label, self.label_completed_task),
                                         corner_radius= 20, border_width = 2, 
                                         fg_color="transparent", font = ("Helvetica",16))
         self.add_button.grid(row = 0, column = 2, sticky = tk.EW, padx = 20)
         
-        self.task_label = ctk.CTkLabel(self, text = "Tareas totales: 0", font = ("Helvetica", 14))
+        self.task_label = ctk.CTkLabel(self, text = "Total tasks: 0", font = ("Helvetica", 14))
         self.task_label.grid(row = 1, column = 0, sticky = tk.EW)
 
-        self.label_completed_task = ctk.CTkLabel(self, text = "Tareas completadas: 0", font = ("Helvetica", 14))
+        self.label_completed_task = ctk.CTkLabel(self, text = "Completed tasks: 0", font = ("Helvetica", 14))
         self.label_completed_task.grid(row = 1, column = 2, sticky = tk.EW)
 
 class FrameMid(ctk.CTkFrame):
@@ -87,12 +88,12 @@ class FrameMid(ctk.CTkFrame):
 
         self.grid_rowconfigure(0, weight = 1)
         self.grid_columnconfigure(0, weight = 1)
-
-        self.task_treeview = ttk.Treeview(self, columns = ["Tarea", "Prioridad", "Estado", "Fecha"], show = "headings")
-        self.task_treeview.heading("Tarea", text = "Tarea")
-        self.task_treeview.heading("Prioridad", text = "Prioridad")
-        self.task_treeview.heading("Estado", text = "Estado")
-        self.task_treeview.heading("Fecha", text = "Fecha")
+        self.task_treeview = ttk.Treeview(self, columns = ["Task", "Priority", "State", "Date"],
+                                         show = "headings", style="Dark.Treeview")
+        self.task_treeview.heading("Task", text = "Task")
+        self.task_treeview.heading("Priority", text = "Priority")
+        self.task_treeview.heading("State", text = "State")
+        self.task_treeview.heading("Date", text = "Date")
         self.task_treeview.grid(row = 0, column = 0, sticky = tk.NSEW)
         
         self.task_treeview.bind("<Double-1>", lambda event: Main.edit_tasks(event, self.task_treeview))     
@@ -115,7 +116,8 @@ class FrameBot(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight = 1)
         self.grid_columnconfigure([0, 1, 2], weight = 1)
 
-        self.button_eliminate = ctk.CTkButton(self, text = "Eliminar", command = lambda: Main.eliminate(task_treeview, label_task, label_completed_task), 
+        self.button_eliminate = ctk.CTkButton(self, text = "Delete", 
+                                            command = lambda: Main.delete(task_treeview, label_task, label_completed_task), 
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.button_eliminate.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 10)
 
@@ -127,7 +129,41 @@ class FrameBot(ctk.CTkFrame):
         self.img = Image.open("Images\\light_dark.ico")
         self.img_resized = self.img.resize((30, 30))
         self.img = ImageTk.PhotoImage(self.img_resized)
-        self.light_dark_button = ctk.CTkButton(self, text = "", command = lambda: Main.change_appearance_mode(),
+        self.light_dark_button = ctk.CTkButton(self, text = "", 
+                                            command = lambda: Main.change_appearance_mode(task_treeview),
                                             image= ctk.CTkImage(dark_image=self.img_resized, light_image=self.img_resized),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
+        
+def style():
+    # Dark mode style
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure("Dark.Treeview",
+                    background="#1e1e1e",  
+                    foreground="white",  
+                    fieldbackground="#1e1e1e",  
+                    bordercolor="#3e3e3e",  
+                    borderwidth=1)
+    style.configure("Dark.Treeview.Heading",
+                    background="#3e3e3e",  
+                    foreground="white",  
+                    relief="flat")
+    style.map("Dark.Treeview.Heading",
+              background=[("active", "#575757")], 
+              relief=[("pressed", "groove"), ("active", "raised")])
+    
+    # Light mode style
+    style.configure("Light.Treeview",
+                    background="#ffffff",  
+                    foreground="black",   
+                    fieldbackground="#ffffff", 
+                    bordercolor="#d9d9d9", 
+                    borderwidth=1)
+    style.configure("Light.Treeview.Heading",
+                    background="#f0f0f0",  
+                    foreground="black",   
+                    relief="flat")
+    style.map("Light.Treeview.Heading",
+              background=[("active", "#e0e0e0")],
+              relief=[("pressed", "groove"), ("active", "raised")])
