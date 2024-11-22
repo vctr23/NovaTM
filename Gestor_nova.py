@@ -54,7 +54,6 @@ class MainWindow():
                                 self.frame_top.label_completed_task, self.frame_mid.notebook)
         self.frame_bot.grid(row = 2, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
         
-        
         self.upload = Main.import_from_json(self.frame_mid.task_treeview, self.frame_top.task_label,
                                             self.frame_top.label_completed_task)
     
@@ -68,7 +67,8 @@ class FrameTop(ctk.CTkFrame):
         self.task_entry = ctk.CTkEntry(self, placeholder_text="Insert task name", font = ("Helvetica", 16))
         self.task_entry.grid(row = 0,column = 0, sticky = tk.EW, padx = 20)
         
-        self.list = ctk.CTkComboBox(self, values = ["High", "Medium", "Low"], font = ("Helvetica",16))
+        self.list = ctk.CTkComboBox(self, values = ["High", "Medium", "Low"], font = ("Helvetica",16),
+                                    state = "readonly")
         self.list.grid(row = 0, column = 1 , sticky = tk.EW, padx = 30)
         
         self.add_button = ctk.CTkButton(self, text = "Add task", 
@@ -110,9 +110,9 @@ class FrameMid(ctk.CTkFrame):
         self.task_treeview.heading("EndDate", text = "EndDate")
         self.task_treeview.grid(row = 0, column = 0, sticky = tk.NSEW)
         
-        self.task_treeview.bind("<Double-1>", lambda event: Main.edit_tasks(event, self.task_treeview))     
+        self.task_treeview.bind("<Double-1>", lambda event: Main.edit_tasks(event, self.task_treeview, self.winfo_toplevel()))     
  
-        self.scroll = ttk.Scrollbar(self.tab1, orient="vertical", command = self.task_treeview.yview)
+        self.scroll = ttk.Scrollbar(self.tab1, orient="vertical")
         self.task_treeview.configure(yscroll = self.scroll.set)
         self.scroll.grid(row = 0, column = 1, sticky = tk.NS)
         
@@ -123,8 +123,7 @@ class FrameMid(ctk.CTkFrame):
         self.button_gantt = ctk.CTkButton(self.tab2, text = "Generate Gantt", 
                          command = lambda: Main.generate_gantt(self.tab2, self.task_treeview))
         self.button_gantt.grid(row = 0, column = 0, sticky = tk.N)
-        
-        
+
 class FrameBot(ctk.CTkFrame):
     def __init__(self, master, task_treeview, label_task, label_completed_task, notebook):
         super().__init__(master)
@@ -150,7 +149,42 @@ class FrameBot(ctk.CTkFrame):
                                             image= ctk.CTkImage(dark_image=self.img_resized, light_image=self.img_resized),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
-        
+
+
+class Toplevel(ctk.CTkToplevel):
+    def __init__(self, master, current_values):
+        super().__init__(master)
+
+        center_window(self, 400)
+        self.grid_rowconfigure([0, 1, 2, 3], weight = 1)
+        self.grid_columnconfigure(0, weight = 1)
+
+        self.task_entry = ctk.CTkEntry(self, placeholder_text = "Insert new task name")
+        self.task_entry.insert(0, current_values[0])
+        self.task_entry.grid(row = 0, column = 0, sticky = tk.EW, padx = 50)
+
+        self.priority = ctk.CTkComboBox(self, values=["High", "Medium", "Low"], state = "readonly")
+        self.priority.set(current_values[1])
+        self.priority.grid(row = 1, column = 0, sticky = tk.EW, padx = 50)
+
+        self.state_entry = ctk.CTkEntry(self, placeholder_text = "Insert new task state")
+        self.state_entry.insert(0, current_values[2])  # current_values[2] is the task state
+        self.state_entry.grid(row = 2, column = 0, sticky = tk.EW, padx = 50)        
+
+        self.button = ctk.CTkButton(self, text = "Confirm",
+                                    command = self.store_data) 
+        self.button.grid(row = 3, column = 0, sticky = tk.EW, padx = 70)
+
+        self.result = None
+    def store_data(self):
+        self.result = {
+            "task_name": self.task_entry.get(),
+            "priority": self.priority.get(),
+            "state": self.state_entry.get()
+        }
+        self.destroy()
+
+
 def style():
     # Dark mode style
     style = ttk.Style()
@@ -183,7 +217,8 @@ def style():
     style.map("Light.Treeview.Heading",
               background=[("active", "#e0e0e0")],
               relief=[("pressed", "groove"), ("active", "raised")])
-    
+
+
 def notebook_style():
     style = ttk.Style()
     style.theme_use("default")  # Usa el tema por defecto para personalización completa
@@ -194,6 +229,3 @@ def notebook_style():
     style.configure("Light.TNotebook", background="white", borderwidth=0)
     style.configure("Light.TNotebook.Tab", background="lightgray", foreground="black", padding=(10, 5))
     style.map("Light.TNotebook.Tab", background=[("selected", "white")], foreground=[("selected", "black")])
-    
-    
-    

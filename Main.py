@@ -34,11 +34,10 @@ def add_task(entry, list, task_treeview, label_task, label_completed_task):
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if len(task) != 0:
-        insert = task_treeview.insert(
-            "", "end", values=[task, priority, state, date])
+        task_treeview.insert("", "end", values=[task, priority, state, date])
         count_tasks(task_treeview, label_task, label_completed_task)
         entry.delete(0, "end")
-        return insert
+        return
     else:
         messagebox.showerror(
             title="ERROR", message="Error could not insert. Entry is empty.")
@@ -63,8 +62,9 @@ def import_from_json(task_treeview, label_task, label_completed_task):
         tasks = json.load(file)
         if tasks:
             for task in tasks:
-                task_treeview.insert("", "end", values=[
-                                     task["Task"], task["Priority"], task["State"], task["Date"], task["EndDate"]])
+                task_treeview.insert("", "end", 
+                                    values=[task["Task"], task["Priority"], 
+                                        task["State"], task["Date"], task["EndDate"]])
         count_tasks(task_treeview, label_task, label_completed_task)
 
 
@@ -82,30 +82,30 @@ def mark_as_completed(task_treeview, label_task, label_completed_task):
             title="Warning", message="Select at least one task to mark as completed.")
 
 
-def edit_tasks(event, task_treeview):
+def edit_tasks(event, task_treeview, root):
     task = task_treeview.selection()
     if task:
-        ctkinput = ctk.CTkInputDialog(text="Introduce the new task name:")
-        task_name = ctkinput.get_input()
-        ctkinput2 = ctk.CTkInputDialog(
-            text="Introduce task priority (High, Medium, Low):")
-        priority = ctkinput2.get_input()
-        ctkinput3 = ctk.CTkInputDialog(
-            text="Introduce task state (Active, Completed):")
-        state = ctkinput3.get_input()
-        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if priority.strip() not in ["High", "Medium", "Low"]:
-            messagebox.showwarning(
-                title="Warning", message="Write a correct priority value.")
-            return
-        elif state.strip() not in ["Active", "Completed"]:
-            messagebox.showwarning(
-                title="Warning", message="Write a correct state value.")
-            return
-        else:
-            task_treeview.item(task, values=(task_name, priority, state, date))
-            messagebox.showinfo(
-                title="Info", message="Row editted succesfully")
+            current_values = task_treeview.item(task)["values"]
+            toplevel = Gestor_nova.Toplevel(root, current_values)
+            toplevel.grab_set()
+            root.wait_window(toplevel)
+
+            if toplevel.result:
+                task_name = toplevel.result.get("task_name", "").strip()
+                priority = toplevel.result.get("priority", "Medium")  
+                state = toplevel.result.get("state", "").strip()
+                date = current_values[3]
+                end_date = current_values[4]
+                if task_name and state:
+                    task_treeview.item(task, values = [task_name, priority, state, date, end_date])
+                else:
+                    messagebox.showwarning(
+                        title="Warning", message = "Error. Task name or state are empty")
+                    return
+    else:
+        messagebox.showwarning(
+            title="Warning", message="Select at least one task to edit.")
+        return
 
 
 def change_appearance_mode(task_treeview, notebook):
@@ -125,7 +125,7 @@ def generate_gantt(tab2, task_treeview):
     end_dates = []
 
     for item in task_treeview.get_children():
-        task, priority, sdate, sdate, edate = task_treeview.item(item)[
+        task, priority, state, sdate, edate = task_treeview.item(item)[
             "values"]
         start_date = pd.to_datetime(sdate)
         end_date = pd.to_datetime(edate)
@@ -136,21 +136,22 @@ def generate_gantt(tab2, task_treeview):
     start_dates = pd.to_datetime(start_dates)
     end_dates = pd.to_datetime(end_dates)
 
-    fig, ax = plt.subplots(figsize=(5, 3))
+    fig, ax = plt.subplots(figsize=(3, 2))
 
     ax.barh(tasks, (end_dates - start_dates), left=start_dates)
 
     ax.xaxis.set_major_locator(mdates.DayLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-    plt.xticks(rotation=45)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+    plt.xticks(rotation=45, fontsize = 8)
+    plt.yticks(fontsize = 8)
 
-    plt.title("Diagrama de Gantt")
-    plt.xlabel("Fecha")
-    plt.ylabel("Tareas")
+    plt.title("Diagrama de Gantt", fontsize = 10)
+    plt.xlabel("Fecha", fontsize = 8)
+    plt.ylabel("Tareas", fontsize = 8)
 
     canvas = FigureCanvasTkAgg(fig, master=tab2)
     canvas.draw()
-    canvas.get_tk_widget().grid(row=1, column=0, sticky=tk.NSEW)
+    canvas.get_tk_widget().grid(row=1, column=0, sticky=tk.NSEW, ipady = 150)
 
 
 # %% 4. Main
