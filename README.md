@@ -14,12 +14,12 @@ It can be used to:
         <tr>
             <td>
                 <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);">
-                    <img src="https://github.com/user-attachments/assets/0885e950-7be2-43f5-949f-a1a4d9f8ae97" alt="Main Frame" width="550">
+                    <img src="https://github.com/user-attachments/assets/0885e950-7be2-43f5-949f-a1a4d9f8ae97" alt="Main Frame" width="600">
                 </div>
             </td>
             <td style="text-align: center; border-left: 1px solid #ccc;">
                 <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);">
-                    <img src="https://github.com/user-attachments/assets/bf363a2c-692f-4d9f-97cc-e531866a1625" alt="Gantt chart" width="550">
+                    <img src="https://github.com/user-attachments/assets/bf363a2c-692f-4d9f-97cc-e531866a1625" alt="Gantt chart" width="600">
                 </div>
             </td>
         </tr>
