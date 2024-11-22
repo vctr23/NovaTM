@@ -9,6 +9,7 @@ Created on Tue Nov 19 16:14:03 2024
 # %% 2. Imports
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
 import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
@@ -33,9 +34,10 @@ def add_task(entry, list, task_treeview, label_task, label_completed_task):
     priority = list.get()
     state = "Active"
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    edate = ""
 
     if len(task) != 0:
-        task_treeview.insert("", "end", values=[task, priority, state, date])
+        task_treeview.insert("", "end", values=[task, priority, state, date, edate])
         count_tasks(task_treeview, label_task, label_completed_task)
         entry.delete(0, "end")
         return
@@ -71,11 +73,12 @@ def import_from_json(task_treeview, label_task, label_completed_task):
 
 def mark_as_completed(task_treeview, label_task, label_completed_task):
     tasks = task_treeview.selection()
+    edate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     if tasks:
         for task in tasks:
             old_values = task_treeview.item(task, "values")
             task_treeview.item(task, values=(
-                old_values[0], old_values[1], "Completed", old_values[3]))
+                old_values[0], old_values[1], "Completed", old_values[3], edate))
         count_tasks(task_treeview, label_task, label_completed_task)
 
     else:

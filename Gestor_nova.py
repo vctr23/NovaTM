@@ -36,12 +36,13 @@ class MainWindow():
         self.root.title("NovaTM")
         center_window(self.root, 1100)
         
+        
         self.root.grid_rowconfigure(0, weight = 1)
         self.root.grid_rowconfigure(1, weight = 10)
         self.root.grid_rowconfigure(2, weight = 1)
         self.root.grid_rowconfigure(3, weight = 1)
         self.root.columnconfigure(0, weight = 1)
-        style()
+        treeview_style()
         notebook_style()
         
         self.frame_mid = FrameMid(self.root)
@@ -54,6 +55,9 @@ class MainWindow():
                                 self.frame_top.label_completed_task, self.frame_mid.notebook)
         self.frame_bot.grid(row = 2, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
         
+        self.menu = MenuTreeview(self.root, self.frame_mid.task_treeview, 
+                        self.frame_top.task_label, self.frame_top.label_completed_task)
+
         self.upload = Main.import_from_json(self.frame_mid.task_treeview, self.frame_top.task_label,
                                             self.frame_top.label_completed_task)
 
@@ -61,7 +65,6 @@ class MainWindow():
 class FrameTop(ctk.CTkFrame):
     def __init__(self, master, task_treeview):
         super().__init__(master)
-        
         self.grid_rowconfigure(0, weight = 1)
         self.grid_columnconfigure([0, 1, 2], weight = 1)
      
@@ -188,7 +191,28 @@ class Toplevel(ctk.CTkToplevel):
         self.destroy()
 
 
-def style():
+class MenuTreeview(tk.Menu):
+    def __init__(self, master, task_treeview, label_task, label_completed_task):
+        super().__init__(master)
+        master.configure(menu = self)
+    
+        self.right_click_menu = tk.Menu(self, tearoff=0, bg="#1e1e1e", fg="white", font=("Arial", 10), activebackground="#4A6984", activeforeground="white")
+        self.right_click_menu.add_command(label="Edit Task", 
+                                        command = lambda: Main.edit_tasks(None, 
+                                                                        task_treeview, master))
+        self.right_click_menu.add_command(label="Delete Task", 
+                                        command = lambda: Main.delete(task_treeview, 
+                                                                    label_task, label_completed_task))
+        self.right_click_menu.add_command(label="Mark Task Completed", 
+                                        command = lambda: Main.mark_as_completed(task_treeview, 
+                                                                            label_task, label_completed_task))
+        self.master.bind("<Button-3>", self.show_right_click_menu)
+
+    def show_right_click_menu(self, event):
+        self.right_click_menu.post(event.x_root, event.y_root)
+
+
+def treeview_style():
     # Dark mode style
     style = ttk.Style()
     style.theme_use("default")
@@ -232,3 +256,21 @@ def notebook_style():
     style.configure("Light.TNotebook", background="white", borderwidth=0)
     style.configure("Light.TNotebook.Tab", background="lightgray", foreground="black", padding=(10, 5))
     style.map("Light.TNotebook.Tab", background=[("selected", "white")], foreground=[("selected", "black")])
+
+def right_click_menu_style():
+    return{
+        "dark_theme": {
+            "bg": "#1e1e1e",
+            "fg": "white",
+            "font": ("Arial", 10),
+            "activebackground": "#4A6984",
+            "activeforeground": "white"
+        },
+        "light_theme": {
+            "bg": "white",
+            "fg": "black",
+            "font": ("Arial", 10),
+            "activebackground": "#e0e0e0",
+            "activeforeground": "black"
+        }
+    }
