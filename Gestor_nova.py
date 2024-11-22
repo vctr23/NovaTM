@@ -56,7 +56,8 @@ class MainWindow():
         
         self.upload = Main.import_from_json(self.frame_mid.task_treeview, self.frame_top.task_label,
                                             self.frame_top.label_completed_task)
-    
+
+
 class FrameTop(ctk.CTkFrame):
     def __init__(self, master, task_treeview):
         super().__init__(master)
@@ -83,6 +84,7 @@ class FrameTop(ctk.CTkFrame):
 
         self.label_completed_task = ctk.CTkLabel(self, text = "Completed tasks: 0", font = ("Helvetica", 14))
         self.label_completed_task.grid(row = 1, column = 2, sticky = tk.EW)
+
 
 class FrameMid(ctk.CTkFrame):
     def __init__(self, master):
@@ -123,6 +125,7 @@ class FrameMid(ctk.CTkFrame):
         self.button_gantt = ctk.CTkButton(self.tab2, text = "Generate Gantt", 
                          command = lambda: Main.generate_gantt(self.tab2, self.task_treeview))
         self.button_gantt.grid(row = 0, column = 0, sticky = tk.N)
+
 
 class FrameBot(ctk.CTkFrame):
     def __init__(self, master, task_treeview, label_task, label_completed_task, notebook):

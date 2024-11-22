@@ -10,6 +10,7 @@ Created on Tue Nov 19 16:14:03 2024
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -136,6 +137,7 @@ def generate_gantt(tab2, task_treeview):
     start_dates = pd.to_datetime(start_dates)
     end_dates = pd.to_datetime(end_dates)
 
+    matplotlib.use("Agg") # Use of Agg to avoid conflicts with Tkinter
     fig, ax = plt.subplots(figsize=(3, 2))
 
     ax.barh(tasks, (end_dates - start_dates), left=start_dates)
@@ -145,17 +147,26 @@ def generate_gantt(tab2, task_treeview):
     plt.xticks(rotation=45, fontsize = 8)
     plt.yticks(fontsize = 8)
 
-    plt.title("Diagrama de Gantt", fontsize = 10)
-    plt.xlabel("Fecha", fontsize = 8)
-    plt.ylabel("Tareas", fontsize = 8)
+    plt.title("Gantt chart", fontsize = 10)
+    plt.xlabel("Date", fontsize = 8)
+    plt.ylabel("Tasks", fontsize = 8)
 
     canvas = FigureCanvasTkAgg(fig, master=tab2)
     canvas.draw()
     canvas.get_tk_widget().grid(row=1, column=0, sticky=tk.NSEW, ipady = 150)
+
+def cleanCanvas():
+    plt.close("all")
 
 
 # %% 4. Main
 if __name__ == "__main__":
     root = ctk.CTk()
     app = Gestor_nova.MainWindow(root)
+
+    def on_closing():
+        cleanCanvas()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
