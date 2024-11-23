@@ -22,7 +22,7 @@ It has these functionalities:
             </td>
             <td style="text-align: center; border-left: 1px solid #ccc;">
                 <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);">
-                    <img src="https://github.com/user-attachments/assets/42d9c01f-ca73-4380-af9d-8d6d603d3ec7" alt="Gantt chart" width="600">
+                    <img src="https://github.com/user-attachments/assets/7fc5350c-afba-48bf-8661-6c460b6a0236" alt="Gantt chart" width="600">
                 </div>
             </td>
         </tr>
