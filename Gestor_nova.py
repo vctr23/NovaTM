@@ -50,14 +50,14 @@ class MainWindow():
 
         self.frame_top = FrameTop(self.root, self.frame_mid.task_treeview)
         self.frame_top.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
+
+        self.menu = MenuTreeview(self.root, self.frame_mid.task_treeview, 
+                                self.frame_top.task_label, self.frame_top.label_completed_task, self.frame_mid.notebook, self.frame_mid.tab2)
                 
         self.frame_bot = FrameBot(self.root, self.frame_mid.task_treeview, self.frame_top.task_label,
-                                self.frame_top.label_completed_task, self.frame_mid.notebook)
+                                self.frame_top.label_completed_task, self.frame_mid.notebook, self.menu, self.frame_mid.tab2)
         self.frame_bot.grid(row = 2, column = 0, sticky = tk.NSEW, padx = 20, pady = 10)
         
-        self.menu = MenuTreeview(self.root, self.frame_mid.task_treeview, 
-                        self.frame_top.task_label, self.frame_top.label_completed_task)
-
         self.upload = Main.import_from_json(self.frame_mid.task_treeview, self.frame_top.task_label,
                                             self.frame_top.label_completed_task)
 
@@ -131,7 +131,7 @@ class FrameMid(ctk.CTkFrame):
 
 
 class FrameBot(ctk.CTkFrame):
-    def __init__(self, master, task_treeview, label_task, label_completed_task, notebook):
+    def __init__(self, master, task_treeview, label_task, label_completed_task, notebook, menu_treeview, tab2):
         super().__init__(master)
 
         self.grid_rowconfigure(0, weight = 1)
@@ -151,7 +151,7 @@ class FrameBot(ctk.CTkFrame):
         self.img_resized = self.img.resize((30, 30))
         self.img = ImageTk.PhotoImage(self.img_resized)
         self.light_dark_button = ctk.CTkButton(self, text = "", 
-                                            command = lambda: Main.change_appearance_mode(task_treeview, notebook),
+                                            command = lambda: Main.change_appearance_mode(task_treeview, notebook, menu_treeview, tab2), 
                                             image= ctk.CTkImage(dark_image=self.img_resized, light_image=self.img_resized),
                                             fg_color="transparent", border_width = 2, corner_radius = 20)
         self.light_dark_button.grid(row = 0, column = 2, sticky = tk.NSEW, padx = 10)
@@ -174,7 +174,7 @@ class Toplevel(ctk.CTkToplevel):
         self.priority.grid(row = 1, column = 0, sticky = tk.EW, padx = 50)
 
         self.state_entry = ctk.CTkEntry(self, placeholder_text = "Insert new task state")
-        self.state_entry.insert(0, current_values[2])  # current_values[2] is the task state
+        self.state_entry.insert(0, current_values[2]) 
         self.state_entry.grid(row = 2, column = 0, sticky = tk.EW, padx = 50)        
 
         self.button = ctk.CTkButton(self, text = "Confirm",
@@ -192,28 +192,55 @@ class Toplevel(ctk.CTkToplevel):
 
 
 class MenuTreeview(tk.Menu):
-    def __init__(self, master, task_treeview, label_task, label_completed_task):
+    def __init__(self, master, task_treeview, label_task, label_completed_task, notebook, tab2):
         super().__init__(master)
         master.configure(menu = self)
-    
-        self.right_click_menu = tk.Menu(self, tearoff=0, bg="#1e1e1e", fg="white", font=("Arial", 10), activebackground="#4A6984", activeforeground="white")
-        self.right_click_menu.add_command(label="Edit Task", 
-                                        command = lambda: Main.edit_tasks(None, 
-                                                                        task_treeview, master))
-        self.right_click_menu.add_command(label="Delete Task", 
-                                        command = lambda: Main.delete(task_treeview, 
-                                                                    label_task, label_completed_task))
-        self.right_click_menu.add_command(label="Mark Task Completed", 
-                                        command = lambda: Main.mark_as_completed(task_treeview, 
-                                                                            label_task, label_completed_task))
+       
+        self.right_click_menu = tk.Menu(self, tearoff=0)
+        self.right_click_menu.add_command(
+            label="Edit Task",
+            command=lambda: Main.edit_tasks(None, task_treeview, self.master)
+        )
+        self.right_click_menu.add_command(
+            label="Delete Task",
+            command=lambda: Main.delete(task_treeview, label_task, label_completed_task)
+        )
+        self.right_click_menu.add_command(
+            label="Mark Task Completed",
+            command=lambda: Main.mark_as_completed(task_treeview, label_task, label_completed_task)
+        )
+        self.right_click_menu.add_separator()
+        self.right_click_menu.add_command(
+            label="Toggle Theme",
+            command= lambda: Main.change_appearance_mode(task_treeview, notebook, self, notebook, tab2)
+        )
+
+        self.menu_styles = right_click_menu_style()
+        self.current_theme = "dark_theme" 
+        self.apply_theme(self.current_theme)
+
         self.master.bind("<Button-3>", self.show_right_click_menu)
+
+    def apply_theme(self, theme):
+        theme = self.menu_styles[theme]
+        self.right_click_menu.config(
+            bg=theme["bg"],
+            fg=theme["fg"],
+            activebackground=theme["activebackground"],
+            activeforeground=theme["activeforeground"]
+        )
+
+    def toggle_theme(self):
+        self.current_theme = "light_theme" if self.current_theme == "dark_theme" else "dark_theme"
+        self.apply_theme(self.current_theme)
 
     def show_right_click_menu(self, event):
         self.right_click_menu.post(event.x_root, event.y_root)
 
 
+
 def treeview_style():
-    # Dark mode style
+    # Dark mode
     style = ttk.Style()
     style.theme_use("default")
     style.configure("Dark.Treeview",
@@ -229,8 +256,7 @@ def treeview_style():
     style.map("Dark.Treeview.Heading",
               background=[("active", "#575757")], 
               relief=[("pressed", "groove"), ("active", "raised")])
-    
-    # Light mode style
+    # Light mode
     style.configure("Light.Treeview",
                     background="#ffffff",  
                     foreground="black",   
@@ -247,30 +273,33 @@ def treeview_style():
 
 
 def notebook_style():
+    # Dark mode for notebook
     style = ttk.Style()
-    style.theme_use("default")  # Usa el tema por defecto para personalización completa
+    style.theme_use("default")
     style.configure("Dark.TNotebook", background="black", borderwidth=0)
     style.configure("Dark.TNotebook.Tab", background="gray20", foreground="white", padding=(10, 5))
     style.map("Dark.TNotebook.Tab", background=[("selected", "black")], foreground=[("selected", "white")])
-    
+    # Light mode for notebook
     style.configure("Light.TNotebook", background="white", borderwidth=0)
     style.configure("Light.TNotebook.Tab", background="lightgray", foreground="black", padding=(10, 5))
     style.map("Light.TNotebook.Tab", background=[("selected", "white")], foreground=[("selected", "black")])
 
 def right_click_menu_style():
+    # Theme for right click menu
     return{
         "dark_theme": {
             "bg": "#1e1e1e",
             "fg": "white",
-            "font": ("Arial", 10),
             "activebackground": "#4A6984",
-            "activeforeground": "white"
+            "activeforeground": "white", 
+            "borderwidth": 1,
         },
         "light_theme": {
             "bg": "white",
             "fg": "black",
-            "font": ("Arial", 10),
             "activebackground": "#e0e0e0",
-            "activeforeground": "black"
+            "activeforeground": "black",
+            "borderwidth": 1,
+            "relief": "solid"
         }
     }

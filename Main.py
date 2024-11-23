@@ -9,7 +9,6 @@ Created on Tue Nov 19 16:14:03 2024
 # %% 2. Imports
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import filedialog
 import customtkinter as ctk
 import matplotlib
 import matplotlib.pyplot as plt
@@ -19,6 +18,7 @@ import pandas as pd
 import datetime
 import json
 import Gestor_nova
+
 # %% 3. Code
 def count_tasks(task_treeview, label_task, label_completed_task):
     number_tasks = len(task_treeview.get_children())
@@ -112,7 +112,7 @@ def edit_tasks(event, task_treeview, root):
         return
 
 
-def change_appearance_mode(task_treeview, notebook):
+def change_appearance_mode(task_treeview, notebook, menu_treeview, tab2):
     if ctk.get_appearance_mode() == "Dark":
         ctk.set_appearance_mode("Light")
         task_treeview["style"] = "Light.Treeview"
@@ -121,6 +121,10 @@ def change_appearance_mode(task_treeview, notebook):
         ctk.set_appearance_mode("Dark")
         task_treeview["style"] = "Dark.Treeview"
         notebook["style"] = "Dark.TNotebook"
+        
+    menu_treeview.toggle_theme()   
+
+    generate_gantt(tab2, task_treeview)
 
 
 def generate_gantt(tab2, task_treeview):
@@ -141,22 +145,35 @@ def generate_gantt(tab2, task_treeview):
     end_dates = pd.to_datetime(end_dates)
 
     matplotlib.use("Agg") # Use of Agg to avoid conflicts with Tkinter
+
+    if ctk.get_appearance_mode() == "Dark":
+        plt.style.use('dark_background')
+        bar_color = '#4A6984' 
+        text_color = 'white'
+    else:
+        plt.style.use('default')
+        bar_color = '#1F77B4'  
+        text_color = 'black'
+
+    cleanCanvas()
     fig, ax = plt.subplots(figsize=(3, 2))
 
-    ax.barh(tasks, (end_dates - start_dates), left=start_dates)
+    ax.barh(tasks, (end_dates - start_dates), left=start_dates, color = bar_color)
 
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
-    plt.xticks(rotation=45, fontsize = 8)
-    plt.yticks(fontsize = 8)
+    plt.xticks(rotation=45, fontsize = 8, color = text_color)
+    plt.yticks(fontsize = 8, color = text_color)
 
-    plt.title("Gantt chart", fontsize = 10)
-    plt.xlabel("Date", fontsize = 8)
-    plt.ylabel("Tasks", fontsize = 8)
+    plt.title("Gantt chart", fontsize = 10, color = text_color)
+    plt.xlabel("Date", fontsize = 8, color = text_color)
+    plt.ylabel("Tasks", fontsize = 8, color = text_color)
 
     canvas = FigureCanvasTkAgg(fig, master=tab2)
     canvas.draw()
     canvas.get_tk_widget().grid(row=1, column=0, sticky=tk.NSEW, ipady = 150)
+
+    return canvas
 
 def cleanCanvas():
     plt.close("all")
