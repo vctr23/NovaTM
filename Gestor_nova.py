@@ -212,7 +212,7 @@ class MenuTreeview(tk.Menu):
         self.right_click_menu.add_separator()
         self.right_click_menu.add_command(
             label="Toggle Theme",
-            command= lambda: Main.change_appearance_mode(task_treeview, notebook, self, notebook, tab2)
+            command= lambda: Main.change_appearance_mode(task_treeview, notebook, self, tab2)
         )
 
         self.menu_styles = right_click_menu_style()
